@@ -1,0 +1,363 @@
+@echo off
+title A HISTORIA - RPG DO TUBER (euzinho)
+color 0A
+setlocal EnableDelayedExpansion
+
+:: === CARREGAR SAVE ===
+if exist save.txt (
+    for /f "tokens=1,2 delims==" %%A in (save.txt) do set %%A=%%B
+)
+
+:: === VARIAVEIS PADRAO ===
+if not defined vida set vida=100
+if not defined ouro set ouro=50
+if not defined gemas set gemas=0
+if not defined pocao set pocao=1
+if not defined arma set arma=Nenhuma
+if not defined armadura set armadura=Nenhuma
+if not defined classe set classe=Guerreiro
+if not defined boss_morto1 set boss_morto1=0
+if not defined boss_morto2 set boss_morto2=0
+if not defined boss_morto3 set boss_morto3=0
+if not defined ajudante set ajudante=0
+if not defined nivel set nivel=1
+if not defined xp set xp=0
+if not defined critico set critico=5
+if not defined paineladm set paineladm=0
+
+:: === MENU INICIAL ===
+:inicio
+cls
+echo === A HISTORIA - RPG EXPANDIDO ===
+echo Vida: %vida%  Ouro: %ouro%  Gemas: %gemas%  Pocoes: %pocao%
+echo Nivel: %nivel%  XP: %xp%
+echo Classe: %classe%  Arma: %arma%  Armadura: %armadura%  Ajudante: %ajudante%
+echo ----------------------------------------
+echo 1 - Aventurar-se
+echo 2 - Loja de Ouro
+echo 3 - Loja de Gemas
+echo 4 - Usar Pocao
+echo 5 - Dormir
+echo 6 - Enfrentar Bosses
+echo 7 - Escolher Classe
+echo 8 - Contratar Ajudante
+echo 9 - Eventos e Missoes
+echo 10 - Salvar Jogo
+echo 0 - Sair
+echo ----------------------------------------
+set /p escolha=Escolha: 
+
+:: === COMANDOS ULTRA MEGA HIPER SECRETOS DE BAIANOS DE ADMINISTRAÇÃO ===
+if "%escolha%"=="abrirpaineladm" (
+    set paineladm=1
+    goto painel_adm
+)
+if "%escolha%"=="fecharpaineladm" (
+    set paineladm=0
+    goto inicio
+)
+
+:: === MENU NORMAL ===
+if "%escolha%"=="1" goto batalha
+if "%escolha%"=="2" goto loja_ouro
+if "%escolha%"=="3" goto loja_gemas
+if "%escolha%"=="4" goto usar_pocao
+if "%escolha%"=="5" goto dormir
+if "%escolha%"=="6" goto boss_menu
+if "%escolha%"=="7" goto classes
+if "%escolha%"=="8" goto ajudante
+if "%escolha%"=="9" goto eventos
+if "%escolha%"=="10" goto salvar
+if "%escolha%"=="0" exit
+goto inicio
+
+:dormir
+cls
+echo Voce dormiu e recuperou a energia.
+set vida=100
+pause
+goto inicio
+
+:usar_pocao
+cls
+if %pocao% LEQ 0 (
+    echo Voce nao tem nenhuma pocao!
+) else (
+    set /a vida+=30
+    set /a pocao-=1
+    echo Voce usou uma pocao e recuperou 30 de vida!
+)
+pause
+goto inicio
+
+:nivel_up
+if %xp% GEQ 100 (
+    set /a xp-=100
+    set /a nivel+=1
+    echo *** Voce subiu para o nivel %nivel%! ***
+    set /a vida+=10
+)
+exit /b
+
+:painel_adm
+cls
+echo === PAINEL DE COMANDOS ULTRA MEGA HIPER SECRETOS DE BAIANOS DA ADMINISTRAÇÃO ===
+echo 1 - Adicionar 999 Ouro
+echo 2 - Adicionar 999 Gemas
+echo 3 - Restaurar Vida
+echo 4 - Adicionar XP
+echo 5 - Adicionar 10 Pocoes
+echo 0 - Voltar
+set /p admopt=Opcao: 
+if "%admopt%"=="1" set /a ouro+=999
+if "%admopt%"=="2" set /a gemas+=999
+if "%admopt%"=="3" set vida=100
+if "%admopt%"=="4" set /a xp+=100
+if "%admopt%"=="5" set /a pocao+=10
+if "%admopt%"=="0" set paineladm=0
+call :nivel_up
+pause
+goto inicio
+
+:eventos
+cls
+echo === EVENTOS E MISSOES ===
+echo 1 - Fale com o Alquimista
+echo 2 - Abrir bau misterioso
+echo 3 - Explorar ruina antiga
+echo 4 - Voltar
+set /p evento=Escolha: 
+if "%evento%"=="1" goto alquimista
+if "%evento%"=="2" goto bau
+if "%evento%"=="3" goto ruina
+if "%evento%"=="4" goto inicio
+goto eventos
+
+:alquimista
+cls
+echo Um alquimista lhe deu uma pocao rara.
+set /a pocao+=1
+set /a xp+=20
+call :nivel_up
+pause
+goto eventos
+
+:bau
+cls
+echo Voce encontrou um bau misterioso!
+set /a ouro=!random! %% 200 + 50
+set /a xp+=15
+call :nivel_up
+pause
+goto eventos
+
+:ruina
+cls
+echo Voce explora uma ruina antiga cheia de armadilhas...
+set /a dano=!random! %% 30
+set /a vida-=dano
+echo Voce sofreu %dano% de dano!
+set /a xp+=30
+call :nivel_up
+pause
+goto eventos
+
+:loja_ouro
+cls
+echo === LOJA DE OURO ===
+echo Seu ouro: %ouro%
+echo 1 - Espada Comum (30 de ouro)
+echo 2 - Armadura Leve (40 de ouro)
+echo 3 - Pocao (10 de ouro)
+echo 4 - Voltar
+set /p lojao=Escolha: 
+if "%lojao%"=="1" (
+    if %ouro% GEQ 30 (
+        set /a ouro-=30
+        set arma=Espada Comum
+        echo Voce comprou uma espada!
+    ) else (
+        echo Ouro insuficiente!
+    )
+)
+if "%lojao%"=="2" (
+    if %ouro% GEQ 40 (
+        set /a ouro-=40
+        set armadura=Armadura Leve
+        echo Voce comprou uma armadura!
+    ) else (
+        echo Ouro insuficiente!
+    )
+)
+if "%lojao%"=="3" (
+    if %ouro% GEQ 10 (
+        set /a ouro-=10
+        set /a pocao+=1
+        echo Voce comprou uma pocao.
+    ) else (
+        echo Ouro insuficiente!
+    )
+)
+if "%lojao%"=="4" goto inicio
+pause
+goto loja_ouro
+
+:loja_gemas
+cls
+echo === LOJA DE GEMAS ===
+echo Suas gemas: %gemas%
+echo 1 - Espada Magica (5 gemas)
+echo 2 - Armadura Sagrada (8 gemas)
+echo 3 - Pocao Suprema (2 gemas)
+echo 4 - Voltar
+set /p lojag=Escolha: 
+if "%lojag%"=="1" (
+    if %gemas% GEQ 5 (
+        set /a gemas-=5
+        set arma=Espada Magica
+        echo Voce comprou a Espada Magica!
+    ) else (
+        echo Gemas insuficientes!
+    )
+)
+if "%lojag%"=="2" (
+    if %gemas% GEQ 8 (
+        set /a gemas-=8
+        set armadura=Armadura Sagrada
+        echo Voce comprou a Armadura Sagrada!
+    ) else (
+        echo Gemas insuficientes!
+    )
+)
+if "%lojag%"=="3" (
+    if %gemas% GEQ 2 (
+        set /a gemas-=2
+        set /a pocao+=2
+        echo Voce comprou duas Pocoes Supremas.
+    ) else (
+        echo Gemas insuficientes!
+    )
+)
+if "%lojag%"=="4" goto inicio
+pause
+goto loja_gemas
+
+:batalha
+cls
+echo === BATALHA ===
+set /a inimigoVida=!random! %% 30 + 20
+set /a danoJogador=!random! %% 20 + 10
+set /a danoInimigo=!random! %% 15 + 5
+echo Um inimigo aparece com %inimigoVida% de vida!
+echo Voce ataca e causa %danoJogador% de dano!
+echo Ele revida e causa %danoInimigo% de dano!
+set /a vida-=danoInimigo
+set /a xp+=25
+call :nivel_up
+pause
+goto inicio
+
+:boss_menu
+cls
+echo === BOSSES ===
+echo 1 - Rei Esqueleto
+echo 2 - Dragao Sombrio
+echo 3 - Demônio Antigo
+echo 4 - Voltar
+set /p bossfight=Escolha: 
+if "%bossfight%"=="1" goto boss1
+if "%bossfight%"=="2" goto boss2
+if "%bossfight%"=="3" goto boss3
+if "%bossfight%"=="4" goto inicio
+goto boss_menu
+
+:boss1
+cls
+if %boss_morto1%==1 (
+    echo O Rei Esqueleto ja foi derrotado.
+    pause
+    goto boss_menu
+)
+echo Voce enfrenta o Rei Esqueleto!
+set /a vida-=30
+set /a xp+=100
+set boss_morto1=1
+call :nivel_up
+pause
+goto boss_menu
+
+:boss2
+cls
+if %boss_morto2%==1 (
+    echo O Dragao Sombrio ja foi derrotado.
+    pause
+    goto boss_menu
+)
+echo Voce enfrenta o Dragao Sombrio!
+set /a vida-=50
+set /a xp+=150
+set boss_morto2=1
+call :nivel_up
+pause
+goto boss_menu
+
+:boss3
+cls
+if %boss_morto3%==1 (
+    echo O Demonio Antigo ja foi derrotado.
+    pause
+    goto boss_menu
+)
+echo Voce enfrenta o Demonio Antigo!
+set /a vida-=70
+set /a xp+=200
+set boss_morto3=1
+call :nivel_up
+pause
+goto boss_menu
+
+:classes
+cls
+echo === ESCOLHA SUA CLASSE ===
+echo 1 - Guerreiro
+echo 2 - Arqueiro
+echo 3 - Mago
+set /p classeopt=Classe: 
+if "%classeopt%"=="1" set classe=Guerreiro
+if "%classeopt%"=="2" set classe=Arqueiro
+if "%classeopt%"=="3" set classe=Mago
+echo Classe escolhida: %classe%
+pause
+goto inicio
+
+:ajudante
+cls
+if %ajudante%==1 (
+    echo Voce ja possui um ajudante.
+) else (
+    echo Voce contratou um ajudante!
+    set ajudante=1
+)
+pause
+goto inicio
+
+:salvar
+(
+    echo vida=%vida%
+    echo ouro=%ouro%
+    echo gemas=%gemas%
+    echo pocao=%pocao%
+    echo arma=%arma%
+    echo armadura=%armadura%
+    echo classe=%classe%
+    echo boss_morto1=%boss_morto1%
+    echo boss_morto2=%boss_morto2%
+    echo boss_morto3=%boss_morto3%
+    echo ajudante=%ajudante%
+    echo nivel=%nivel%
+    echo xp=%xp%
+    echo critico=%critico%
+) > save.txt
+echo Jogo salvo com sucesso!
+pause
+goto inicio
